@@ -7,8 +7,12 @@ import { CreateBulkUsersDto, CreateUserDto } from 'src/auth/dto/CreateUser.dto';
 @Injectable()
 export class UserService {
   constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
-  async findByEmail(email: string, select?: 'password'): Promise<User> {
-    return this.userModel.findOne({ email }).select(select).exec();
+  async findByEmail(email: string, select?: '+password'): Promise<User | null> {
+    const query = this.userModel.findOne({ email });
+    if (select) {
+      query.select(select);
+    }
+    return query.exec(); // Avoid using `.lean()` if you need Mongoose document methods
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
@@ -28,24 +32,42 @@ export class UserService {
     if (!user) {
       throw new Error('User not found');
     }
-    const location = `${user.location.coordinates[0]},${user.location.coordinates[1]}`;
-    const nearbyUsers = await this.userModel
-      .find({
-        'location.coordinates': {
-          $geoWithin: {
-            $centerSphere: [
-              [
-                parseFloat(location.split(',')[0]),
-                parseFloat(location.split(',')[1]),
-              ],
-              4 / 3963.2,
-            ],
-          },
+    const location = user.location.coordinates;
+    const [longitude, latitude] = location;
+    // const nearbyUsers = await this.userModel
+    //   .find({
+    //     'location.coordinates': {
+    //       $geoWithin: {
+    //         $centerSphere: [[longitude, latitude], 4 / 3963.2],
+    //       },
+    //     },
+    //   })
+    //   .exec();
+    const withDistanceFromUser = await this.userModel.aggregate([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [longitude, latitude] },
+          distanceField: 'distance',
+          spherical: true,
         },
-      })
-      .exec();
+      },
+      {
+        $match: { email: { $ne: user.email } },
+      },
+      {
+        $project: {
+          email: 1,
+          name: 1,
+          location: 1,
+          distance: { $round: [{ $divide: ['$distance', 1000] }, 2] }, // Convert to km and round to 2 decimal places
+        },
+      },
+      {
+        $sort: { distance: 1 }, // Sort by distance in ascending order
+      },
+    ]);
 
-    return nearbyUsers;
+    return withDistanceFromUser;
   }
   async createBulkUsers(
     createBulkUsersDto: CreateBulkUsersDto,

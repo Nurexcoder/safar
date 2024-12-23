@@ -1,4 +1,4 @@
-import { User } from 'src/user/user.schema';
+import { User } from "src/user/user.schema";
 
 export interface JWTPayload {
   email: string;
@@ -8,6 +8,6 @@ export interface JWTPayload {
 export interface AuthResponse {
   email: string;
   name: string;
-  location: User['location'];
+  location: User["location"];
   accessToken: string;
 }

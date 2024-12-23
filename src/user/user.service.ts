@@ -35,15 +35,7 @@ export class UserService {
     }
     const location = user.location.coordinates;
     const [longitude, latitude] = location;
-    // const nearbyUsers = await this.userModel
-    //   .find({
-    //     'location.coordinates': {
-    //       $geoWithin: {
-    //         $centerSphere: [[longitude, latitude], 4 / 3963.2],
-    //       },
-    //     },
-    //   })
-    //   .exec();
+
     const withDistanceFromUser = await this.userModel.aggregate([
       {
         $geoNear: {

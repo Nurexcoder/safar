@@ -1,13 +1,13 @@
-import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
-import { User } from "./user.schema";
-import { CreateBulkUsersDto, CreateUserDto } from "src/auth/dto/CreateUser.dto";
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from './user.schema';
+import { CreateBulkUsersDto, CreateUserDto } from 'src/auth/dto/CreateUser.dto';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel("User") private readonly userModel: Model<User>) {}
-  async findByEmail(email: string, select?: "+password"): Promise<User | null> {
+  constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
+  async findByEmail(email: string, select?: '+password'): Promise<User | null> {
     const query = this.userModel.findOne({ email });
     if (select) {
       query.select(select);
@@ -19,7 +19,7 @@ export class UserService {
     const createdUser = new this.userModel({
       ...createUserDto,
       location: {
-        type: "Point",
+        type: 'Point',
         coordinates: createUserDto.coordinates,
       },
     });
@@ -31,7 +31,7 @@ export class UserService {
     const userId = req?.user?._id;
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error("User not found");
+      throw new Error('User not found');
     }
     const location = user.location.coordinates;
     const [longitude, latitude] = location;
@@ -39,8 +39,8 @@ export class UserService {
     const withDistanceFromUser = await this.userModel.aggregate([
       {
         $geoNear: {
-          near: { type: "Point", coordinates: [longitude, latitude] },
-          distanceField: "distance",
+          near: { type: 'Point', coordinates: [longitude, latitude] },
+          distanceField: 'distance',
           spherical: true,
         },
       },
@@ -52,7 +52,7 @@ export class UserService {
           email: 1,
           name: 1,
           location: 1,
-          distance: { $round: [{ $divide: ["$distance", 1000] }, 2] }, // Convert to km and round to 2 decimal places
+          distance: { $round: [{ $divide: ['$distance', 1000] }, 2] }, // Convert to km and round to 2 decimal places
         },
       },
       {
@@ -68,7 +68,7 @@ export class UserService {
     const usersToInsert = createBulkUsersDto.users.map((user) => ({
       ...user,
       location: {
-        type: "Point",
+        type: 'Point',
         coordinates: user.coordinates,
       },
     }));

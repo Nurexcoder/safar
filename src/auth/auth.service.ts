@@ -2,14 +2,14 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from "@nestjs/common";
-import { UserService } from "src/user/user.service";
-import { CreateUserDto } from "./dto/CreateUser.dto";
-import { User } from "src/user/user.schema";
-import { JwtService } from "@nestjs/jwt";
-import * as bcrypt from "bcrypt";
-import { AuthResponse } from "./auth";
-import { LoginDto } from "./dto/Login.dto";
+} from '@nestjs/common';
+import { UserService } from 'src/user/user.service';
+import { CreateUserDto } from './dto/CreateUser.dto';
+import { User } from 'src/user/user.schema';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { AuthResponse } from './auth';
+import { LoginDto } from './dto/Login.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +19,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userService.findByEmail(email, "+password");
+    const user = await this.userService.findByEmail(email, '+password');
     if (!user) {
       return null;
     }
@@ -45,7 +45,7 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthResponse> {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
-      throw new NotFoundException("Invalid email or password");
+      throw new NotFoundException('Invalid email or password');
     }
     return this.generateAuthResponse(user);
   }
@@ -53,7 +53,7 @@ export class AuthService {
   async signUp(createUser: CreateUserDto): Promise<AuthResponse> {
     const user = await this.userService.findByEmail(createUser.email);
     if (user) {
-      throw new ConflictException("User already exists");
+      throw new ConflictException('User already exists');
     }
 
     const createdUser = await this.userService.createUser(createUser);

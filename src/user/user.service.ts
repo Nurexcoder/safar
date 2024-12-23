@@ -27,7 +27,8 @@ export class UserService {
 
     return createdUser;
   }
-  async getNearbyUsers(userId: string): Promise<User[]> {
+  async getNearbyUsers(req): Promise<User[]> {
+    const userId = req?.user?._id;
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
       throw new Error('User not found');

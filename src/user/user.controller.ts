@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Request, Post, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from './user.schema';
@@ -11,10 +11,10 @@ import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.guard';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @Post('nearby/:userId')
+  @Post('nearby')
   @ApiOperation({ summary: 'Get nearby users' })
-  async getNearbyUsers(@Param('userId') userId: string): Promise<User[]> {
-    return this.userService.getNearbyUsers(userId);
+  async getNearbyUsers(@Request() req): Promise<User[]> {
+    return this.userService.getNearbyUsers(req);
   }
   @ApiOperation({ summary: 'Create bulk users' })
   @Post('bulk')

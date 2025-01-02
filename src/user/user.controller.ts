@@ -13,10 +13,8 @@ import {
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { User } from "./user.schema";
 import { CreateBulkUsersDto } from "src/auth/dto/CreateUser.dto";
 import { JwtAuthGuard } from "src/auth/gaurds/jwt-auth.guard";
-import { UserDto } from "./dto/User.dto";
 import { UserResponseDto } from "./dto/UsersResponse.dto";
 
 @ApiTags("user")
@@ -44,7 +42,7 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: "Users created successfully",
-    type: [UserDto],
+    type: [UserResponseDto],
   })
   @Post("bulk")
   async createBulkUsers(

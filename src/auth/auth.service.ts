@@ -2,14 +2,14 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
-import { CreateUserDto } from './dto/CreateUser.dto';
-import { User } from 'src/user/user.schema';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { AuthResponse } from './auth';
-import { LoginDto } from './dto/Login.dto';
+} from "@nestjs/common";
+import { UserService } from "src/user/user.service";
+import { CreateUserDto } from "./dto/CreateUser.dto";
+import { User } from "src/user/user.schema";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { LoginDto } from "./dto/Login.dto";
+import { AuthResponseDataDto, AuthResponseDto } from "./dto/AuthResponse.dto";
 
 @Injectable()
 export class AuthService {
@@ -19,7 +19,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userService.findByEmail(email, '+password');
+    const user = await this.userService.findByEmail(email, "+password");
     if (!user) {
       return null;
     }
@@ -31,7 +31,7 @@ export class AuthService {
     return null;
   }
 
-  generateAuthResponse(user: User): AuthResponse {
+  generateAuthResponse(user: User): AuthResponseDataDto {
     const jwtPayload = { email: user.email, sub: user._id };
     const accessToken = this.jwtService.sign(jwtPayload);
     return {
@@ -42,22 +42,30 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto): Promise<AuthResponse> {
+  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
-      throw new NotFoundException('Invalid email or password');
+      throw new NotFoundException("Invalid email or password");
     }
-    return this.generateAuthResponse(user);
+    return {
+      code: 200,
+      message: "Account logged in successfully",
+      data: this.generateAuthResponse(user),
+    };
   }
 
-  async signUp(createUser: CreateUserDto): Promise<AuthResponse> {
+  async signUp(createUser: CreateUserDto): Promise<AuthResponseDto> {
     const user = await this.userService.findByEmail(createUser.email);
     if (user) {
-      throw new ConflictException('User already exists');
+      throw new ConflictException("User already exists");
     }
 
     const createdUser = await this.userService.createUser(createUser);
 
-    return this.generateAuthResponse(createdUser);
+    return {
+      code: 201,
+      message: "Account created successfully",
+      data: this.generateAuthResponse(createdUser),
+    };
   }
 }

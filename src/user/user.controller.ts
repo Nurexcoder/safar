@@ -1,24 +1,58 @@
-import { Body, Controller, Request, Post, UseGuards } from '@nestjs/common';
-import { UserService } from './user.service';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { User } from './user.schema';
-import { CreateBulkUsersDto } from 'src/auth/dto/CreateUser.dto';
-import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.guard';
+import {
+  Body,
+  Controller,
+  Request,
+  Post,
+  UseGuards,
+  Get,
+} from "@nestjs/common";
+import { UserService } from "./user.service";
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
+import { CreateBulkUsersDto } from "src/auth/dto/CreateUser.dto";
+import { JwtAuthGuard } from "src/auth/gaurds/jwt-auth.guard";
+import { UserResponseDto } from "./dto/UsersResponse.dto";
 
-@ApiTags('user')
+@ApiTags("user")
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('user')
+@Controller("user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @Post('nearby')
-  @ApiOperation({ summary: 'Get nearby users' })
-  async getNearbyUsers(@Request() req): Promise<User[]> {
-    return this.userService.getNearbyUsers(req);
+  @Get("nearby")
+  @ApiOperation({ summary: "Get nearby users" })
+  @ApiResponse({
+    status: 200,
+    description: "Users fetched successfully",
+    type: [UserResponseDto],
+  })
+  async getNearbyUsers(@Request() req): Promise<UserResponseDto> {
+    const users = await this.userService.getNearbyUsers(req);
+    return {
+      code: 200,
+      message: "Users fetched successfully",
+      data: users,
+    };
   }
-  @ApiOperation({ summary: 'Create bulk users' })
-  @Post('bulk')
-  async createBulkUsers(@Body() createBulkUsersDto: CreateBulkUsersDto) {
-    return this.userService.createBulkUsers(createBulkUsersDto);
+  @ApiOperation({ summary: "Create bulk users" })
+  @ApiResponse({
+    status: 201,
+    description: "Users created successfully",
+    type: [UserResponseDto],
+  })
+  @Post("bulk")
+  async createBulkUsers(
+    @Body() createBulkUsersDto: CreateBulkUsersDto,
+  ): Promise<UserResponseDto> {
+    const users = await this.userService.createBulkUsers(createBulkUsersDto);
+    return {
+      code: 201,
+      message: "Users created successfully",
+      data: users,
+    };
   }
 }

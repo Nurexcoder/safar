@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ConfigValidationSchema } from "./common/config.schema";
 import { MongooseModule } from "@nestjs/mongoose";
 import { UserModule } from "./user/user.module";
-import { FriendsModule } from './friends/friends.module';
+import { FriendsModule } from "./friends/friends.module";
 
 @Module({
   imports: [
